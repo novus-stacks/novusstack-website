@@ -1,0 +1,369 @@
+<!doctype html>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Novusstack Digital Studio</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap");
+
+/* Layout: single-column landing page with a split hero, card grid for services, stepped process, a project showcase and pricing tiers. */
+:root {
+  --bg: #f7f9f9;
+  --surface: #ffffff;
+  --fg: #142238;
+  --muted: #56647a;
+  --line: #d9e2e4;
+  --navy: #1b3a66;
+  --teal: #1f8a7e;
+  --green: #2f7d52;
+  --gold: #e0a02e;
+  --accent: #1f8a7e;
+  --accent-fg: #ffffff;
+  --code-bg: #142238;
+  --code-fg: #e3ecef;
+  --display: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+  --body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1626;
+    --surface: #132136;
+    --fg: #eef3f6;
+    --muted: #9fb0c2;
+    --line: #26384f;
+    --navy: #8fb4e8;
+    --teal: #4fd1b8;
+    --accent: #4fd1b8;
+    --accent-fg: #0c1626;
+    --code-bg: #070e19;
+    --code-fg: #d7e2ea;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1626;
+  --surface: #132136;
+  --fg: #eef3f6;
+  --muted: #9fb0c2;
+  --line: #26384f;
+  --navy: #8fb4e8;
+  --teal: #4fd1b8;
+  --accent: #4fd1b8;
+  --accent-fg: #0c1626;
+  --code-bg: #070e19;
+  --code-fg: #d7e2ea;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin: 0 auto; }
+section { padding-block: 72px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.1rem, 5.4vw, 3.8rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0; text-wrap: pretty; }
+.lede { font-size: 1.05rem; color: var(--muted); max-width: 56ch; margin-top: 18px; }
+.eyebrow {
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--teal);
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.btn {
+  display: inline-block; padding: 12px 20px; border-radius: 8px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg);
+  font: 600 0.95rem var(--body); text-decoration: none; cursor: pointer;
+}
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+
+/* Header */
+header { padding-block: 18px; border-bottom: 1px solid var(--line); background: var(--bg); }
+header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand svg { width: 34px; height: 34px; flex: none; }
+.wordmark { font: 800 1.05rem var(--display); letter-spacing: 0.02em; }
+.wordmark b { color: var(--navy); font-weight: 800; }
+.wordmark span { color: var(--teal); }
+nav { display: flex; gap: 22px; flex-wrap: wrap; }
+nav a { text-decoration: none; color: var(--muted); font-size: 0.92rem; }
+nav a:hover { color: var(--fg); }
+
+/* Hero */
+.hero { padding-block: 80px 68px; }
+.hero-grid { display: grid; gap: 48px; grid-template-columns: 1.1fr 1fr; align-items: center; }
+.hero-grid > * { min-width: 0; }
+.hero .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.code {
+  background: var(--code-bg); color: var(--code-fg); border-radius: 12px;
+  font: 500 0.82rem/1.7 var(--mono); padding: 18px 20px; overflow-x: auto; min-width: 0;
+  border: 1px solid var(--line); white-space: pre;
+}
+.code .k { color: #e0a02e; }
+.code .m { color: #6fd3bf; }
+.code-bar { display: flex; gap: 6px; margin-bottom: 12px; }
+.code-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a4c63; display: block; }
+
+/* Services */
+.grid3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 36px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+.card p { color: var(--muted); margin-top: 10px; font-size: 0.95rem; }
+.card ul { margin: 14px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.92rem; }
+
+/* Process */
+.steps { display: grid; margin-top: 36px; border-top: 1px solid var(--line); }
+.step { display: grid; grid-template-columns: 90px 1fr; gap: 16px; padding-block: 22px; border-bottom: 1px solid var(--line); }
+.step .n { font: 600 0.9rem var(--mono); color: var(--gold); padding-top: 4px; }
+.step p { color: var(--muted); margin-top: 6px; }
+
+/* Projects */
+.projects { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 36px; }
+.project { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.project .body { padding: 22px 24px 26px; }
+.project .tag { font: 500 0.75rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); }
+.project p { color: var(--muted); margin-top: 10px; font-size: 0.95rem; }
+.project ul { margin: 14px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.92rem; }
+.visual {
+  aspect-ratio: 16 / 9; max-width: 100%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--navy), var(--teal) 60%, var(--gold));
+  color: #ffffff;
+}
+.visual.alt { background: linear-gradient(135deg, var(--teal), var(--green) 55%, var(--navy)); }
+.visual svg { width: 56%; max-width: 260px; height: auto; }
+
+/* Pricing */
+.price { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 36px; }
+.tier .amount { font: 800 2rem var(--display); margin-top: 14px; }
+.tier .amount small { font: 400 0.9rem var(--body); color: var(--muted); }
+.tier.featured { border-color: var(--teal); }
+.tier ul { list-style: none; padding: 0; margin: 18px 0 22px; color: var(--muted); font-size: 0.93rem; }
+.tier li { padding-block: 6px; border-top: 1px solid var(--line); }
+.tier .btn { width: 100%; text-align: center; box-sizing: border-box; }
+
+/* Contact */
+.contact { display: grid; gap: 40px; grid-template-columns: 1fr 1.1fr; align-items: start; }
+.contact > * { min-width: 0; }
+form { display: grid; gap: 14px; }
+label { display: grid; gap: 6px; font-size: 0.9rem; color: var(--muted); }
+input, textarea, select {
+  font: 400 1rem var(--body); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 11px 13px; width: 100%; box-sizing: border-box;
+}
+textarea { min-height: 120px; resize: vertical; }
+.note { font-size: 0.88rem; color: var(--muted); min-height: 1.4em; }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px; color: var(--muted); font-size: 0.88rem; }
+footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 760px) {
+  .hero-grid, .contact { grid-template-columns: 1fr; }
+  section { padding-block: 56px; }
+  .step { grid-template-columns: 56px 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Novusstack home">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="6" y="36" width="8" height="20" fill="#2f7d52"/>
+        <rect x="18" y="26" width="8" height="30" fill="#2f7d52"/>
+        <path d="M30 56 V22 L44 36 L58 22 V56" fill="none" stroke="#1f8a7e" stroke-width="7" stroke-linejoin="round"/>
+        <path d="M30 14 L44 6" stroke="#e0a02e" stroke-width="5" stroke-linecap="round"/>
+        <path d="M40 12 L54 2 M54 2 L54 14 M54 2 L42 2" stroke="#e0a02e" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wordmark"><b>NOVUS</b><span>STACK</span></span>
+    </a>
+    <nav>
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#work">Projects</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Digital development &amp; solutions</p>
+        <h1 style="margin-top:14px">Websites, chatbots and online stores built to grow your business.</h1>
+        <p class="lede">Novusstack designs and builds custom websites, AI chatbots and e-commerce platforms. Payments run through Razorpay, and every site is built to be easy to update after launch.</p>
+        <div class="actions">
+          <a class="btn" href="#contact">Start a project</a>
+          <a class="btn ghost" href="#work">See our projects</a>
+        </div>
+      </div>
+      <div class="code" aria-label="Example code">
+        <div class="code-bar"><i></i><i></i><i></i></div><span class="m">// checkout.js</span>
+<span class="k">const</span> order = <span class="k">await</span> createOrder({ amount: 1499, currency: <span class="m">"INR"</span> });
+<span class="k">const</span> rzp = <span class="k">new</span> Razorpay({
+  key: PUBLIC_KEY,
+  order_id: order.id,
+  name: <span class="m">"Your Store"</span>,
+});
+rzp.open();
+        </div>
+    </div>
+  </section>
+
+  <section id="services" style="border-top:1px solid var(--line)">
+    <div class="wrap">
+      <p class="eyebrow">Services</p>
+      <h2 style="margin-top:10px">What we build</h2>
+      <div class="grid3">
+        <article class="card">
+          <h3>Business websites</h3>
+          <p>Fast, mobile-friendly sites that present your business clearly and bring in enquiries.</p>
+          <ul><li>Custom design</li><li>SEO basics</li><li>Hosting setup</li></ul>
+        </article>
+        <article class="card">
+          <h3>E-commerce stores</h3>
+          <p>Online stores with product catalogues, carts and secure payments through Razorpay.</p>
+          <ul><li>Razorpay checkout</li><li>Order management</li><li>Inventory updates</li></ul>
+        </article>
+        <article class="card">
+          <h3>AI chatbots</h3>
+          <p>Chatbots that answer customer questions around the clock and hand over to your team when needed.</p>
+          <ul><li>Website and WhatsApp-ready</li><li>Trained on your content</li><li>Lead capture</li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="process" style="border-top:1px solid var(--line)">
+    <div class="wrap">
+      <p class="eyebrow">How we work</p>
+      <h2 style="margin-top:10px">From first call to launch</h2>
+      <div class="steps">
+        <div class="step"><div class="n">01</div><div><h3>Discovery call</h3><p>We learn what you sell, who you sell to, and what the product must do. You get a written scope and a fixed quote.</p></div></div>
+        <div class="step"><div class="n">02</div><div><h3>Design</h3><p>You review the layout and visual design before any code is written.</p></div></div>
+        <div class="step"><div class="n">03</div><div><h3>Build and test</h3><p>We build on a staging link you can open on your phone, and test payments in Razorpay's sandbox before go-live.</p></div></div>
+        <div class="step"><div class="n">04</div><div><h3>Launch and handover</h3><p>We move the site live, set up analytics, and show you how to edit content yourself.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="work" style="border-top:1px solid var(--line)">
+    <div class="wrap">
+      <p class="eyebrow">Our projects</p>
+      <h2 style="margin-top:10px">Recent work</h2>
+      <div class="projects">
+        <article class="project">
+          <div class="visual">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="10" y="20" width="100" height="62" rx="14" fill="none" stroke="#ffffff" stroke-width="6"/>
+              <path d="M34 82 L30 100 L52 84" fill="#ffffff"/>
+              <circle cx="40" cy="51" r="6" fill="#ffffff"/>
+              <circle cx="60" cy="51" r="6" fill="#ffffff"/>
+              <circle cx="80" cy="51" r="6" fill="#ffffff"/>
+            </svg>
+          </div>
+          <div class="body">
+            <span class="tag">AI chatbot</span>
+            <h3 style="margin-top:8px">Zyro</h3>
+            <p>An AI chatbot that answers visitor questions and helps capture leads.</p>
+          </div>
+        </article>
+        <article class="project">
+          <div class="visual alt">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <path d="M18 30 H32 L42 82 H94 L102 44 H38" fill="none" stroke="#ffffff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="48" cy="98" r="7" fill="#ffffff"/>
+              <circle cx="88" cy="98" r="7" fill="#ffffff"/>
+              <rect x="56" y="54" width="34" height="18" rx="4" fill="#ffffff"/>
+            </svg>
+          </div>
+          <div class="body">
+            <span class="tag">E-commerce</span>
+            <h3 style="margin-top:8px">Online store with Razorpay payments</h3>
+            <p>A full online store where customers browse products, check out, and pay securely through Razorpay.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" style="border-top:1px solid var(--line)">
+    <div class="wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2 style="margin-top:10px">Clear prices, no surprises</h2>
+      <p class="lede">Every project starts with a fixed quote after the discovery call. These are starting prices.</p>
+      <div class="price">
+        <article class="card tier">
+          <h3>Starter website</h3>
+          <div class="amount">₹25,000 <small>starting</small></div>
+          <ul><li>Up to 5 pages</li><li>Mobile-friendly design</li><li>Contact form</li></ul>
+          <a class="btn ghost" href="#contact">Get a quote</a>
+        </article>
+        <article class="card tier featured">
+          <h3>E-commerce store</h3>
+          <div class="amount">₹60,000 <small>starting</small></div>
+          <ul><li>Product catalogue and cart</li><li>Razorpay payments</li><li>Admin panel to manage products</li></ul>
+          <a class="btn" href="#contact">Get a quote</a>
+        </article>
+        <article class="card tier">
+          <h3>AI chatbot</h3>
+          <div class="amount">Custom</div>
+          <ul><li>Trained on your content</li><li>Lead capture</li><li>Scoped after discovery</li></ul>
+          <a class="btn ghost" href="#contact">Talk to us</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" style="border-top:1px solid var(--line)">
+    <div class="wrap contact">
+      <div>
+        <p class="eyebrow">Contact</p>
+        <h2 style="margin-top:10px">Tell us about your project</h2>
+        <p class="lede">Share a few details and we will reply within one working day with questions and next steps.</p>
+        <p style="margin-top:24px;color:var(--muted)">novusstacks@gmail.com<br>Mon to Sat, 10:00 to 19:00 IST</p>
+      </div>
+      <form id="enquiry">
+        <label>Name <input name="name" required autocomplete="name"></label>
+        <label>Email <input name="email" type="email" required autocomplete="email"></label>
+        <label>Project type
+          <select name="type">
+            <option>Business website</option>
+            <option>E-commerce store</option>
+            <option>AI chatbot</option>
+            <option>Not sure yet</option>
+          </select>
+        </label>
+        <label>What do you need? <textarea name="message" required></textarea></label>
+        <button class="btn" type="submit">Send enquiry</button>
+        <p class="note" id="status" role="status"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Novusstack. Digital development &amp; solutions.</span>
+    <span>Websites, chatbots and online stores</span>
+  </div>
+</footer>
+
+<script>
+// No backend is connected yet. Wire this handler to your form service or API.
+document.getElementById("enquiry").addEventListener("submit", function (e) {
+  e.preventDefault();
+  document.getElementById("status").textContent = "Thanks, your enquiry is noted. (Connect a form service to deliver it.)";
+  this.reset();
+});
+</script>
