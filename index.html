@@ -619,7 +619,7 @@ $("register-form").addEventListener("submit", function (e) {
     .finally(function () { btn.disabled = false; });
 });
 
-// Enquiry form (Netlify function -> Brevo)
+// Enquiry form (Web3Forms -> novusstacks@gmail.com)
 $("enquiry").addEventListener("submit", async function (e) {
   e.preventDefault();
   var form = this;
@@ -629,9 +629,11 @@ $("enquiry").addEventListener("submit", async function (e) {
   status.textContent = "Sending...";
   var data = Object.fromEntries(new FormData(form).entries());
   try {
-    var res = await fetch("/api/enquiry", {
+    data.access_key = "6d2bfc07-7071-4c02-877a-81c7f05caf8f";
+    data.subject = "New enquiry from Novusstack website";
+    var res = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "accept": "application/json" },
       body: JSON.stringify(data)
     });
     var out = await res.json();
