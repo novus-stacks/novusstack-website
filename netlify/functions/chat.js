@@ -6,7 +6,7 @@ For a quote, ask for the customer's name, email and project details, or suggest 
 Keep answers short and polite.`;
 
 const JSON_HEADERS = {"content-type": "application/json"};
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-3.8-flash";
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
