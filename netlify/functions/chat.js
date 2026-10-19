@@ -57,7 +57,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           systemInstruction: {parts: [{text: BASE_PROMPT + "\n" + languageRule}]},
           contents: history,
-          generationConfig: {maxOutputTokens: 400, temperature: 0.5},
+          generationConfig: {maxOutputTokens: 2000, temperature: 0.5},
         }),
       }
     );
