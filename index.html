@@ -182,6 +182,42 @@ textarea { min-height: 120px; resize: vertical; }
 .auth-card form { margin-top: 18px; }
 .auth-card .btn { width: 100%; box-sizing: border-box; text-align: center; }
 
+[hidden] { display: none !important; }
+
+/* Chat widget */
+.chat-fab {
+  position: fixed; z-index: 50;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 999px;
+  padding: 12px 18px; font: 600 0.92rem var(--body); cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+.chat-panel {
+  position: fixed; z-index: 50; display: flex; flex-direction: column; overflow: hidden;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: 76px;
+  width: min(360px, calc(100vw - 32px)); height: min(480px, 70vh);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+.chat-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-bottom: 1px solid var(--line); font-weight: 600;
+}
+.chat-head button { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1.3rem; line-height: 1; }
+.chat-log { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 85%; padding: 8px 12px; border-radius: 10px; font-size: 0.92rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg.bot { background: var(--bg); border: 1px solid var(--line); align-self: flex-start; }
+.msg.user { background: var(--accent); color: var(--accent-fg); align-self: flex-end; }
+.chat-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+.chat-form input { flex: 1; min-width: 0; }
+.chat-form button {
+  padding: 0 14px; border-radius: 8px; border: 0; background: var(--accent); color: var(--accent-fg);
+  font-weight: 600; cursor: pointer;
+}
+.chat-form button:disabled { opacity: 0.6; cursor: wait; }
+
 footer { border-top: 1px solid var(--line); padding-block: 28px; color: var(--muted); font-size: 0.88rem; }
 footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
@@ -433,6 +469,19 @@ rzp.open();
   </div>
 </footer>
 
+<button type="button" class="chat-fab" id="chat-fab" aria-expanded="false" aria-controls="chat-panel">Chat with us</button>
+<div class="chat-panel" id="chat-panel" hidden role="dialog" aria-label="Novusstack assistant">
+  <div class="chat-head">
+    <span>Novusstack assistant</span>
+    <button type="button" id="chat-close" aria-label="Close chat">&times;</button>
+  </div>
+  <div class="chat-log" id="chat-log" aria-live="polite"></div>
+  <form class="chat-form" id="chat-form">
+    <input name="q" placeholder="Type your question..." required maxlength="1000" autocomplete="off">
+    <button type="submit" id="chat-send">Send</button>
+  </form>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
 <script>
@@ -567,6 +616,68 @@ $("enquiry").addEventListener("submit", async function (e) {
     status.textContent = "Network error. Please try again or email novusstacks@gmail.com directly.";
   } finally {
     button.disabled = false;
+  }
+});
+
+// Chat widget (calls /api/chat -> Netlify function -> Groq)
+var chatHistory = [];
+var chatPanel = $("chat-panel");
+var chatLog = $("chat-log");
+
+function addMsg(role, text) {
+  var d = document.createElement("div");
+  d.className = "msg " + role;
+  d.textContent = text;
+  chatLog.appendChild(d);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return d;
+}
+
+function toggleChat(open) {
+  chatPanel.hidden = !open;
+  $("chat-fab").setAttribute("aria-expanded", String(open));
+  if (open) {
+    if (!chatLog.childElementCount) {
+      addMsg("bot", "Hi! Naan Novusstack assistant. Websites, e-commerce, AI chatbot pathi enna venum-nu kelunga.");
+    }
+    $("chat-form").q.focus();
+  }
+}
+
+$("chat-fab").addEventListener("click", function () { toggleChat(chatPanel.hidden); });
+$("chat-close").addEventListener("click", function () { toggleChat(false); });
+
+$("chat-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  var input = this.q;
+  var text = input.value.trim();
+  if (!text) return;
+  var btn = $("chat-send");
+  input.value = "";
+  addMsg("user", text);
+  chatHistory.push({ role: "user", content: text });
+  btn.disabled = true;
+  var typing = addMsg("bot", "...");
+  try {
+    var res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+    var out = await res.json();
+    if (res.ok && out.reply) {
+      typing.textContent = out.reply;
+      chatHistory.push({ role: "assistant", content: out.reply });
+    } else {
+      typing.textContent = "Sorry, bot ippo busy-a irukku. novusstacks@gmail.com-ku email pannunga.";
+      chatHistory.pop();
+    }
+  } catch (err) {
+    typing.textContent = "Network error. Konjam kazhichu try pannunga.";
+    chatHistory.pop();
+  } finally {
+    btn.disabled = false;
+    input.focus();
   }
 });
 
