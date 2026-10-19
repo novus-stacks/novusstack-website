@@ -1,9 +1,9 @@
-const SYSTEM_PROMPT = `You are the website assistant for Novusstack, a digital development studio.
+const BASE_PROMPT = `You are the website assistant for Novusstack, a digital development studio.
 Services: business websites, e-commerce stores with Razorpay payments, and AI chatbots.
 Starting prices: Starter website INR 25,000. E-commerce store INR 60,000. AI chatbot is custom-priced.
 Contact: novusstacks@gmail.com, Monday to Saturday, 10:00 to 19:00 IST.
-Answer briefly and politely. For a quote, ask for the customer's name, email and project details, or suggest the contact form on the website.
-Reply in the same language the user writes in (English, Tamil or Tanglish).`;
+For a quote, ask for the customer's name, email and project details, or suggest the contact form on the website.
+Keep answers short and polite.`;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -17,7 +17,13 @@ exports.handler = async (event) => {
     return {statusCode: 400, body: JSON.stringify({error: "Invalid JSON"})};
   }
 
-  // Keep only the last 10 messages and cap each message length
+  // Language: Tamil only for users from Tamil Nadu, India. Everyone else gets English.
+  const locale = body.locale || {};
+  const isTamilNadu = locale.country === "India" && /tamil\s*nadu/i.test(String(locale.state || ""));
+  const languageRule = isTamilNadu
+    ? "The user is from Tamil Nadu, India. Reply in Tamil (Tamil script)."
+    : "Always reply in English.";
+
   const history = (Array.isArray(body.messages) ? body.messages : [])
     .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
     .slice(-10)
@@ -36,7 +42,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        messages: [{role: "system", content: SYSTEM_PROMPT}, ...history],
+        messages: [{role: "system", content: BASE_PROMPT + "\n" + languageRule}, ...history],
         max_tokens: 400,
         temperature: 0.5,
       }),
