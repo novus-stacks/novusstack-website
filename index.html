@@ -258,9 +258,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       <a href="#process">Process</a>
       <a href="#work">Projects</a>
       <a href="#pricing">Pricing</a>
-      <a href="#contact">Contact</a>
-      <a href="#code" data-nav="code">Code</a>
-      <a href="#login" id="nav-login" data-nav="login">Login</a>
+      <a href="#contact">Contact</a>      <a href="#login" id="nav-login" data-nav="login">Login</a>
       <a href="#register" id="nav-register" class="nav-cta" data-nav="register">Register</a>
       <div id="nav-user" hidden>
         <span id="nav-user-name"></span>
@@ -484,23 +482,6 @@ rzp.open();
   </div>
 </section>
 
-<section id="code-page" class="code-page" hidden>
-  <div class="wrap">
-    <p class="eyebrow">Code helper</p>
-    <h2 style="margin-top:10px">Website code ezhudhunga</h2>
-    <p class="lede">Unga website / page code venum na type pannunga. Code block-ah Copy button vechu copy pannalam.</p>
-    <div class="chat-box">
-      <div class="chat-log" id="code-log" aria-live="polite">
-        <div class="msg bot">Hi! Enna code venum? Example: "simple food delivery website HTML"</div>
-      </div>
-      <form class="chat-form" id="code-form">
-        <input name="q" placeholder="Enna code venum nu type pannunga..." required maxlength="1000" autocomplete="off">
-        <button type="submit" id="code-send">Send</button>
-      </form>
-    </div>
-  </div>
-</section>
-
 <footer>
   <div class="wrap">
     <span>© 2026 Novusstack. Digital development &amp; solutions.</span>
@@ -508,18 +489,6 @@ rzp.open();
   </div>
 </footer>
 
-<button type="button" class="chat-fab" id="chat-fab" aria-expanded="false" aria-controls="chat-panel">Chat with us</button>
-<div class="chat-panel" id="chat-panel" hidden role="dialog" aria-label="Novusstack assistant">
-  <div class="chat-head">
-    <span>Novusstack assistant</span>
-    <button type="button" id="chat-close" aria-label="Close chat">&times;</button>
-  </div>
-  <div class="chat-log" id="chat-log" aria-live="polite"></div>
-  <form class="chat-form" id="chat-form">
-    <input name="q" placeholder="Type your question..." required maxlength="1000" autocomplete="off">
-    <button type="submit" id="chat-send">Send</button>
-  </form>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
@@ -560,17 +529,15 @@ function friendly(err) {
 function route() {
   var h = location.hash;
   var isAuth = (h === "#login" || h === "#register");
-  var isCode = h === "#code";
   var landing = document.querySelectorAll(".landing");
-  for (var i = 0; i < landing.length; i++) landing[i].hidden = isAuth || isCode;
+  for (var i = 0; i < landing.length; i++) landing[i].hidden = isAuth;
   $("auth").hidden = !isAuth;
-  $("code-page").hidden = !isCode;
   $("login-panel").hidden = h !== "#login";
   $("register-panel").hidden = h !== "#register";
   $("tab-login").classList.toggle("active", h === "#login");
   $("tab-register").classList.toggle("active", h === "#register");
 
-  if (isAuth || isCode) {
+  if (isAuth) {
     window.scrollTo(0, 0);
   } else if (h === "" || h === "#home") {
     window.scrollTo(0, 0);
@@ -681,146 +648,6 @@ $("enquiry").addEventListener("submit", async function (e) {
   }
 });
 
-// Chat widget (calls /api/chat -> Netlify function -> Gemini)
-var chatHistory = [];
-var chatPanel = $("chat-panel");
-var chatLog = $("chat-log");
-
-function addMsg(role, text) {
-  var d = document.createElement("div");
-  d.className = "msg " + role;
-  d.textContent = text;
-  chatLog.appendChild(d);
-  chatLog.scrollTop = chatLog.scrollHeight;
-  return d;
-}
-
-// Render a reply; ```code``` blocks are shown as code boxes
-function renderReply(el, text) {
-  el.textContent = "";
-  text.split(/```(?:\w+)?\n?/).forEach(function (part, i) {
-    if (i % 2 === 1) {
-      var wrap = document.createElement("div");
-      wrap.className = "codewrap";
-      var pre = document.createElement("pre");
-      var code = document.createElement("code");
-      code.textContent = part.replace(/\n$/, "");
-      pre.appendChild(code);
-      var copy = document.createElement("button");
-      copy.type = "button";
-      copy.className = "copy-btn";
-      copy.textContent = "Copy";
-      copy.addEventListener("click", function () {
-        navigator.clipboard.writeText(code.textContent).then(function () {
-          copy.textContent = "Copied!";
-          setTimeout(function () { copy.textContent = "Copy"; }, 1500);
-        }).catch(function () { copy.textContent = "Failed"; });
-      });
-      wrap.appendChild(copy);
-      wrap.appendChild(pre);
-      el.appendChild(wrap);
-    } else if (part.trim()) {
-      var p = document.createElement("div");
-      p.textContent = part.trim();
-      el.appendChild(p);
-    }
-  });
-}
-
-function toggleChat(open) {
-  chatPanel.hidden = !open;
-  $("chat-fab").setAttribute("aria-expanded", String(open));
-  if (open) {
-    if (!chatLog.childElementCount) {
-      addMsg("bot", "Hi! I'm the Novusstack assistant. Ask me about websites, e-commerce stores or AI chatbots.");
-    }
-    $("chat-form").q.focus();
-  }
-}
-
-$("chat-fab").addEventListener("click", function () { toggleChat(chatPanel.hidden); });
-$("chat-close").addEventListener("click", function () { toggleChat(false); });
-
-$("chat-form").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  var input = this.q;
-  var text = input.value.trim();
-  if (!text) return;
-  var btn = $("chat-send");
-  input.value = "";
-  addMsg("user", text);
-  chatHistory.push({ role: "user", content: text });
-  btn.disabled = true;
-  var typing = addMsg("bot", "...");
-  try {
-    var res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: chatHistory, locale: userProfile })
-    });
-    var out = await res.json();
-    if (res.ok && out.reply) {
-      renderReply(typing, out.reply);
-      chatHistory.push({ role: "assistant", content: out.reply });
-    } else {
-      typing.textContent = "Sorry, the assistant is busy right now. Please email novusstacks@gmail.com.";
-      chatHistory.pop();
-    }
-  } catch (err) {
-    typing.textContent = "Network error. Please try again in a moment.";
-    chatHistory.pop();
-  } finally {
-    btn.disabled = false;
-    input.focus();
-  }
-});
-
-// Code helper page (#code): same /api/chat, bigger view, copy buttons on code blocks
-var codeHistory = [];
-
-function addLog(log, role, text) {
-  var d = document.createElement("div");
-  d.className = "msg " + role;
-  d.textContent = text;
-  log.appendChild(d);
-  log.scrollTop = log.scrollHeight;
-  return d;
-}
-
-$("code-form").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  var input = this.q;
-  var text = input.value.trim();
-  if (!text) return;
-  var log = $("code-log");
-  var btn = $("code-send");
-  input.value = "";
-  addLog(log, "user", text);
-  codeHistory.push({ role: "user", content: text });
-  btn.disabled = true;
-  var typing = addLog(log, "bot", "...");
-  try {
-    var res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: codeHistory, locale: userProfile })
-    });
-    var out = await res.json();
-    if (res.ok && out.reply) {
-      renderReply(typing, out.reply);
-      codeHistory.push({ role: "assistant", content: out.reply });
-    } else {
-      typing.textContent = "Sorry, the assistant is busy right now. Please try again.";
-      codeHistory.pop();
-    }
-  } catch (err) {
-    typing.textContent = "Network error. Please try again in a moment.";
-    codeHistory.pop();
-  } finally {
-    btn.disabled = false;
-    input.focus();
-  }
-});
 
 route();
 </script>
