@@ -489,19 +489,21 @@ function route() {
 window.addEventListener("hashchange", route);
 
 // Login / logout state
-auth.onAuthStateChanged(function (user) {
+function renderUser(user) {
   var logged = !!user;
   $("nav-login").hidden = logged;
   $("nav-register").hidden = logged;
   $("nav-user").hidden = !logged;
   if (logged) {
     $("nav-user-name").textContent = "Hi, " + (user.displayName || user.email);
-    $("auth-email").textContent = user.email;
+    $("auth-email").textContent = user.displayName || user.email;
   }
   $("auth-logged").hidden = !logged;
   $("login-panel").hidden = logged || location.hash !== "#login";
   $("register-panel").hidden = logged || location.hash !== "#register";
-});
+}
+
+auth.onAuthStateChanged(renderUser);
 
 function logout() { auth.signOut(); }
 $("logout-btn").addEventListener("click", logout);
@@ -530,6 +532,7 @@ $("register-form").addEventListener("submit", function (e) {
   auth.createUserWithEmailAndPassword(f.email.value, f.password.value)
     .then(function (cred) { return cred.user.updateProfile({ displayName: f.name.value }); })
     .then(function () {
+      renderUser(auth.currentUser);
       $("register-msg").textContent = "";
       f.reset();
       location.hash = "#home";
