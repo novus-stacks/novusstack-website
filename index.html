@@ -334,6 +334,9 @@ rzp.open();
         <p style="margin-top:24px;color:var(--muted)">novusstacks@gmail.com<br>Mon to Sat, 10:00 to 19:00 IST</p>
       </div>
       <form id="enquiry">
+        <input type="hidden" name="access_key" value="6d2bfc07-7071-4c02-877a-81c7f05caf8f">
+        <input type="hidden" name="subject" value="New enquiry from Novusstack website">
+        <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none">
         <label>Name <input name="name" required autocomplete="name"></label>
         <label>Email <input name="email" type="email" required autocomplete="email"></label>
         <label>Project type
@@ -363,7 +366,24 @@ rzp.open();
 // No backend is connected yet. Wire this handler to your form service or API.
 document.getElementById("enquiry").addEventListener("submit", function (e) {
   e.preventDefault();
-  document.getElementById("status").textContent = "Thanks, your enquiry is noted. (Connect a form service to deliver it.)";
-  this.reset();
+  var form = this;
+  var status = document.getElementById("status");
+  var button = form.querySelector("button[type=submit]");
+  button.disabled = true;
+  status.textContent = "Sending...";
+  fetch("https://api.web3forms.com/submit", { method: "POST", body: new FormData(form) })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data.success) {
+        status.textContent = "Thanks! Your enquiry has been sent. We will reply within one working day.";
+        form.reset();
+      } else {
+        status.textContent = "Sorry, something went wrong. Please email novusstacks@gmail.com directly.";
+      }
+    })
+    .catch(function () {
+      status.textContent = "Network error. Please try again or email novusstacks@gmail.com directly.";
+    })
+    .finally(function () { button.disabled = false; });
 });
 </script>
