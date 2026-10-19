@@ -210,6 +210,15 @@ textarea { min-height: 120px; resize: vertical; }
 .msg { max-width: 85%; padding: 8px 12px; border-radius: 10px; font-size: 0.92rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
 .msg.bot { background: var(--bg); border: 1px solid var(--line); align-self: flex-start; }
 .msg.user { background: var(--accent); color: var(--accent-fg); align-self: flex-end; }
+.msg pre { margin: 0; padding: 30px 10px 10px; border-radius: 8px; background: var(--code-bg); color: var(--code-fg); overflow-x: auto; font: 500 0.78rem/1.5 var(--mono); white-space: pre; }
+.msg pre code { font: inherit; }
+.codewrap { position: relative; margin: 6px 0; }
+.copy-btn { position: absolute; top: 6px; right: 6px; font: 600 0.72rem var(--body); padding: 3px 9px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.code-page .chat-box { display: flex; flex-direction: column; overflow: hidden; margin-top: 24px; height: min(680px, 72vh); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.code-page .chat-log { padding: 16px; }
+.code-page .chat-form input { padding: 12px; }
+.code-page .chat-form button { padding: 0 20px; }
+.code-page .msg { max-width: 92%; font-size: 0.95rem; }
 .chat-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
 .chat-form input { flex: 1; min-width: 0; }
 .chat-form button {
@@ -250,6 +259,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       <a href="#work">Projects</a>
       <a href="#pricing">Pricing</a>
       <a href="#contact">Contact</a>
+      <a href="#code" data-nav="code">Code</a>
       <a href="#login" id="nav-login" data-nav="login">Login</a>
       <a href="#register" id="nav-register" class="nav-cta" data-nav="register">Register</a>
       <div id="nav-user" hidden>
@@ -474,6 +484,23 @@ rzp.open();
   </div>
 </section>
 
+<section id="code-page" class="code-page" hidden>
+  <div class="wrap">
+    <p class="eyebrow">Code helper</p>
+    <h2 style="margin-top:10px">Website code ezhudhunga</h2>
+    <p class="lede">Unga website / page code venum na type pannunga. Code block-ah Copy button vechu copy pannalam.</p>
+    <div class="chat-box">
+      <div class="chat-log" id="code-log" aria-live="polite">
+        <div class="msg bot">Hi! Enna code venum? Example: "simple food delivery website HTML"</div>
+      </div>
+      <form class="chat-form" id="code-form">
+        <input name="q" placeholder="Enna code venum nu type pannunga..." required maxlength="1000" autocomplete="off">
+        <button type="submit" id="code-send">Send</button>
+      </form>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
     <span>© 2026 Novusstack. Digital development &amp; solutions.</span>
@@ -533,15 +560,17 @@ function friendly(err) {
 function route() {
   var h = location.hash;
   var isAuth = (h === "#login" || h === "#register");
+  var isCode = h === "#code";
   var landing = document.querySelectorAll(".landing");
-  for (var i = 0; i < landing.length; i++) landing[i].hidden = isAuth;
+  for (var i = 0; i < landing.length; i++) landing[i].hidden = isAuth || isCode;
   $("auth").hidden = !isAuth;
+  $("code-page").hidden = !isCode;
   $("login-panel").hidden = h !== "#login";
   $("register-panel").hidden = h !== "#register";
   $("tab-login").classList.toggle("active", h === "#login");
   $("tab-register").classList.toggle("active", h === "#register");
 
-  if (isAuth) {
+  if (isAuth || isCode) {
     window.scrollTo(0, 0);
   } else if (h === "" || h === "#home") {
     window.scrollTo(0, 0);
@@ -671,11 +700,25 @@ function renderReply(el, text) {
   el.textContent = "";
   text.split(/```(?:\w+)?\n?/).forEach(function (part, i) {
     if (i % 2 === 1) {
+      var wrap = document.createElement("div");
+      wrap.className = "codewrap";
       var pre = document.createElement("pre");
       var code = document.createElement("code");
       code.textContent = part.replace(/\n$/, "");
       pre.appendChild(code);
-      el.appendChild(pre);
+      var copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "copy-btn";
+      copy.textContent = "Copy";
+      copy.addEventListener("click", function () {
+        navigator.clipboard.writeText(code.textContent).then(function () {
+          copy.textContent = "Copied!";
+          setTimeout(function () { copy.textContent = "Copy"; }, 1500);
+        }).catch(function () { copy.textContent = "Failed"; });
+      });
+      wrap.appendChild(copy);
+      wrap.appendChild(pre);
+      el.appendChild(wrap);
     } else if (part.trim()) {
       var p = document.createElement("div");
       p.textContent = part.trim();
@@ -726,6 +769,53 @@ $("chat-form").addEventListener("submit", async function (e) {
   } catch (err) {
     typing.textContent = "Network error. Please try again in a moment.";
     chatHistory.pop();
+  } finally {
+    btn.disabled = false;
+    input.focus();
+  }
+});
+
+// Code helper page (#code): same /api/chat, bigger view, copy buttons on code blocks
+var codeHistory = [];
+
+function addLog(log, role, text) {
+  var d = document.createElement("div");
+  d.className = "msg " + role;
+  d.textContent = text;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+  return d;
+}
+
+$("code-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  var input = this.q;
+  var text = input.value.trim();
+  if (!text) return;
+  var log = $("code-log");
+  var btn = $("code-send");
+  input.value = "";
+  addLog(log, "user", text);
+  codeHistory.push({ role: "user", content: text });
+  btn.disabled = true;
+  var typing = addLog(log, "bot", "...");
+  try {
+    var res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: codeHistory, locale: userProfile })
+    });
+    var out = await res.json();
+    if (res.ok && out.reply) {
+      renderReply(typing, out.reply);
+      codeHistory.push({ role: "assistant", content: out.reply });
+    } else {
+      typing.textContent = "Sorry, the assistant is busy right now. Please try again.";
+      codeHistory.pop();
+    }
+  } catch (err) {
+    typing.textContent = "Network error. Please try again in a moment.";
+    codeHistory.pop();
   } finally {
     btn.disabled = false;
     input.focus();
