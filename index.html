@@ -1,10 +1,12 @@
 <!doctype html>
-<meta name="claude:viewport-fit-sides" content="cover">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Novusstack Digital Studio</title>
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap");
 
-/* Layout: single-column landing page with a split hero, card grid for services, stepped process, a project showcase and pricing tiers. */
 :root {
   --bg: #f7f9f9;
   --surface: #ffffff;
@@ -17,6 +19,7 @@
   --gold: #e0a02e;
   --accent: #1f8a7e;
   --accent-fg: #ffffff;
+  --error: #b42318;
   --code-bg: #142238;
   --code-fg: #e3ecef;
   --display: "Montserrat", "Helvetica Neue", Arial, sans-serif;
@@ -35,6 +38,7 @@
     --teal: #4fd1b8;
     --accent: #4fd1b8;
     --accent-fg: #0c1626;
+    --error: #ff8a80;
     --code-bg: #070e19;
     --code-fg: #d7e2ea;
     color-scheme: dark;
@@ -50,6 +54,7 @@
   --teal: #4fd1b8;
   --accent: #4fd1b8;
   --accent-fg: #0c1626;
+  --error: #ff8a80;
   --code-bg: #070e19;
   --code-fg: #d7e2ea;
   color-scheme: dark;
@@ -73,10 +78,7 @@ h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 700; letter-spacing: 
 h3 { font-size: 1.1rem; font-weight: 600; }
 p { margin: 0; text-wrap: pretty; }
 .lede { font-size: 1.05rem; color: var(--muted); max-width: 56ch; margin-top: 18px; }
-.eyebrow {
-  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--teal);
-}
+.eyebrow { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
@@ -85,6 +87,7 @@ a { color: inherit; }
   border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg);
   font: 600 0.95rem var(--body); text-decoration: none; cursor: pointer;
 }
+.btn:disabled { opacity: 0.6; cursor: wait; }
 .btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
 
 /* Header */
@@ -95,9 +98,16 @@ header .wrap { display: flex; align-items: center; justify-content: space-betwee
 .wordmark { font: 800 1.05rem var(--display); letter-spacing: 0.02em; }
 .wordmark b { color: var(--navy); font-weight: 800; }
 .wordmark span { color: var(--teal); }
-nav { display: flex; gap: 22px; flex-wrap: wrap; }
+nav { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
 nav a { text-decoration: none; color: var(--muted); font-size: 0.92rem; }
 nav a:hover { color: var(--fg); }
+nav a.current { color: var(--fg); font-weight: 600; }
+nav .nav-cta { color: var(--accent); font-weight: 600; }
+#nav-user { display: flex; gap: 12px; align-items: center; font-size: 0.92rem; color: var(--muted); }
+#nav-user button {
+  font: 600 0.85rem var(--body); padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  background: transparent; color: var(--fg); border: 1px solid var(--line);
+}
 
 /* Hero */
 .hero { padding-block: 80px 68px; }
@@ -132,11 +142,9 @@ nav a:hover { color: var(--fg); }
 .project .body { padding: 22px 24px 26px; }
 .project .tag { font: 500 0.75rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); }
 .project p { color: var(--muted); margin-top: 10px; font-size: 0.95rem; }
-.project ul { margin: 14px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.92rem; }
 .visual {
   aspect-ratio: 16 / 9; max-width: 100%; display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, var(--navy), var(--teal) 60%, var(--gold));
-  color: #ffffff;
 }
 .visual.alt { background: linear-gradient(135deg, var(--teal), var(--green) 55%, var(--navy)); }
 .visual svg { width: 56%; max-width: 260px; height: auto; }
@@ -162,6 +170,18 @@ input, textarea, select {
 textarea { min-height: 120px; resize: vertical; }
 .note { font-size: 0.88rem; color: var(--muted); min-height: 1.4em; }
 
+/* Auth */
+.auth-wrap { max-width: 440px; margin: 0 auto; }
+.auth-tabs { display: flex; gap: 8px; margin-top: 24px; }
+.auth-tabs a {
+  flex: 1; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none;
+  border: 1px solid var(--line); color: var(--muted); font-weight: 600;
+}
+.auth-tabs a.active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.auth-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-top: 20px; }
+.auth-card form { margin-top: 18px; }
+.auth-card .btn { width: 100%; box-sizing: border-box; text-align: center; }
+
 footer { border-top: 1px solid var(--line); padding-block: 28px; color: var(--muted); font-size: 0.88rem; }
 footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
@@ -172,10 +192,12 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
+</head>
+<body>
 
 <header>
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Novusstack home">
+    <a class="brand" href="#home" aria-label="Novusstack home">
       <svg viewBox="0 0 64 64" aria-hidden="true">
         <rect x="6" y="36" width="8" height="20" fill="#2f7d52"/>
         <rect x="18" y="26" width="8" height="30" fill="#2f7d52"/>
@@ -186,16 +208,23 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
       <span class="wordmark"><b>NOVUS</b><span>STACK</span></span>
     </a>
     <nav>
+      <a href="#home" data-nav="home">Home</a>
       <a href="#services">Services</a>
       <a href="#process">Process</a>
       <a href="#work">Projects</a>
       <a href="#pricing">Pricing</a>
       <a href="#contact">Contact</a>
+      <a href="#login" id="nav-login" data-nav="login">Login</a>
+      <a href="#register" id="nav-register" class="nav-cta" data-nav="register">Register</a>
+      <div id="nav-user" hidden>
+        <span id="nav-user-name"></span>
+        <button type="button" id="logout-btn">Logout</button>
+      </div>
     </nav>
   </div>
 </header>
 
-<main id="top">
+<main id="home" class="landing">
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
@@ -208,7 +237,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         </div>
       </div>
       <div class="code" aria-label="Example code">
-        <div class="code-bar"><i></i><i></i><i></i></div><span class="m">// checkout.js</span>
+<div class="code-bar"><i></i><i></i><i></i></div><span class="m">// checkout.js</span>
 <span class="k">const</span> order = <span class="k">await</span> createOrder({ amount: 1499, currency: <span class="m">"INR"</span> });
 <span class="k">const</span> rzp = <span class="k">new</span> Razorpay({
   key: PUBLIC_KEY,
@@ -216,7 +245,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
   name: <span class="m">"Your Store"</span>,
 });
 rzp.open();
-        </div>
+      </div>
     </div>
   </section>
 
@@ -334,9 +363,6 @@ rzp.open();
         <p style="margin-top:24px;color:var(--muted)">novusstacks@gmail.com<br>Mon to Sat, 10:00 to 19:00 IST</p>
       </div>
       <form id="enquiry">
-        <input type="hidden" name="access_key" value="6d2bfc07-7071-4c02-877a-81c7f05caf8f">
-        <input type="hidden" name="subject" value="New enquiry from Novusstack website">
-        <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none">
         <label>Name <input name="name" required autocomplete="name"></label>
         <label>Email <input name="email" type="email" required autocomplete="email"></label>
         <label>Project type
@@ -355,6 +381,51 @@ rzp.open();
   </section>
 </main>
 
+<section id="auth" class="auth-section" hidden>
+  <div class="wrap">
+    <div class="auth-wrap">
+      <p class="eyebrow">Your account</p>
+      <h2 style="margin-top:10px">Login or create an account</h2>
+      <div class="auth-tabs">
+        <a href="#login" id="tab-login" data-tab="login">Login</a>
+        <a href="#register" id="tab-register" data-tab="register">Register</a>
+      </div>
+
+      <div id="auth-logged" class="auth-card" hidden>
+        <p>You are logged in as <strong id="auth-email"></strong>.</p>
+        <p class="note" style="margin-top:8px">Enquiry form-ah neenga normal-a use pannalaam.</p>
+        <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+          <a class="btn" href="#home">Go to Home</a>
+          <button class="btn ghost" type="button" id="logout-btn-2">Logout</button>
+        </div>
+      </div>
+
+      <div id="login-panel" class="auth-card" hidden>
+        <h3>Login</h3>
+        <form id="login-form">
+          <label>Email <input name="email" type="email" required autocomplete="email"></label>
+          <label>Password <input name="password" type="password" required minlength="6" autocomplete="current-password"></label>
+          <button class="btn" type="submit" id="login-btn">Login</button>
+          <p class="note" id="login-msg" role="status"></p>
+        </form>
+        <p class="note" style="margin-top:14px">Account illaiya? <a href="#register" style="color:var(--accent)">Register pannunga</a>.</p>
+      </div>
+
+      <div id="register-panel" class="auth-card" hidden>
+        <h3>Register</h3>
+        <form id="register-form">
+          <label>Name <input name="name" required autocomplete="name"></label>
+          <label>Email <input name="email" type="email" required autocomplete="email"></label>
+          <label>Password (minimum 6 characters) <input name="password" type="password" required minlength="6" autocomplete="new-password"></label>
+          <button class="btn" type="submit" id="register-btn">Create account</button>
+          <p class="note" id="register-msg" role="status"></p>
+        </form>
+        <p class="note" style="margin-top:14px">Already account irukka? <a href="#login" style="color:var(--accent)">Login pannunga</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
     <span>© 2026 Novusstack. Digital development &amp; solutions.</span>
@@ -362,28 +433,141 @@ rzp.open();
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
 <script>
-// No backend is connected yet. Wire this handler to your form service or API.
-document.getElementById("enquiry").addEventListener("submit", function (e) {
+// Firebase config (public values, safe in frontend code)
+firebase.initializeApp({
+  apiKey: "AIzaSyBOyIm0COxSEDccrgMDyBLLxpDSwTBGQsU",
+  authDomain: "novusstack-c1493.firebaseapp.com",
+  projectId: "novusstack-c1493",
+  storageBucket: "novusstack-c1493.firebasestorage.app",
+  messagingSenderId: "740102135820",
+  appId: "1:740102135820:web:c8da7dc7367ffd5f474e29"
+});
+var auth = firebase.auth();
+
+function $(id) { return document.getElementById(id); }
+
+function friendly(err) {
+  var map = {
+    "auth/invalid-email": "Email format sari illa.",
+    "auth/user-not-found": "Account illa. Register pannunga.",
+    "auth/wrong-password": "Password thappu.",
+    "auth/invalid-credential": "Email illa password thappu.",
+    "auth/email-already-in-use": "Indha email already register aagiduchu. Login pannunga.",
+    "auth/weak-password": "Password kandippa 6 characters-ku mela irukanum.",
+    "auth/too-many-requests": "Romba try pannitteenga. Konjam neram kazhichu try pannunga.",
+    "auth/network-request-failed": "Network error. Internet check pannunga.",
+    "auth/operation-not-allowed": "Email/Password login Firebase-la enable aagala.",
+    "auth/unauthorized-domain": "Indha domain Firebase Authorized domains-la illa."
+  };
+  return map[err.code] || err.message;
+}
+
+// Show Home or Login/Register view based on the URL hash
+function route() {
+  var h = location.hash;
+  var isAuth = (h === "#login" || h === "#register");
+  var landing = document.querySelectorAll(".landing");
+  for (var i = 0; i < landing.length; i++) landing[i].hidden = isAuth;
+  $("auth").hidden = !isAuth;
+  $("login-panel").hidden = h !== "#login";
+  $("register-panel").hidden = h !== "#register";
+  $("tab-login").classList.toggle("active", h === "#login");
+  $("tab-register").classList.toggle("active", h === "#register");
+
+  if (isAuth) {
+    window.scrollTo(0, 0);
+  } else if (h === "" || h === "#home") {
+    window.scrollTo(0, 0);
+  } else {
+    var target = document.querySelector(h);
+    if (target) target.scrollIntoView();
+  }
+}
+window.addEventListener("hashchange", route);
+
+// Login / logout state
+auth.onAuthStateChanged(function (user) {
+  var logged = !!user;
+  $("nav-login").hidden = logged;
+  $("nav-register").hidden = logged;
+  $("nav-user").hidden = !logged;
+  if (logged) {
+    $("nav-user-name").textContent = "Hi, " + (user.displayName || user.email);
+    $("auth-email").textContent = user.email;
+  }
+  $("auth-logged").hidden = !logged;
+  $("login-panel").hidden = logged || location.hash !== "#login";
+  $("register-panel").hidden = logged || location.hash !== "#register";
+});
+
+function logout() { auth.signOut(); }
+$("logout-btn").addEventListener("click", logout);
+$("logout-btn-2").addEventListener("click", logout);
+
+$("login-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var f = e.target, btn = $("login-btn");
+  btn.disabled = true;
+  $("login-msg").textContent = "Logging in...";
+  auth.signInWithEmailAndPassword(f.email.value, f.password.value)
+    .then(function () {
+      $("login-msg").textContent = "";
+      f.reset();
+      location.hash = "#home";
+    })
+    .catch(function (err) { $("login-msg").textContent = friendly(err); })
+    .finally(function () { btn.disabled = false; });
+});
+
+$("register-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var f = e.target, btn = $("register-btn");
+  btn.disabled = true;
+  $("register-msg").textContent = "Creating account...";
+  auth.createUserWithEmailAndPassword(f.email.value, f.password.value)
+    .then(function (cred) { return cred.user.updateProfile({ displayName: f.name.value }); })
+    .then(function () {
+      $("register-msg").textContent = "";
+      f.reset();
+      location.hash = "#home";
+    })
+    .catch(function (err) { $("register-msg").textContent = friendly(err); })
+    .finally(function () { btn.disabled = false; });
+});
+
+// Enquiry form (Netlify function -> Brevo)
+$("enquiry").addEventListener("submit", async function (e) {
   e.preventDefault();
   var form = this;
-  var status = document.getElementById("status");
+  var status = $("status");
   var button = form.querySelector("button[type=submit]");
   button.disabled = true;
   status.textContent = "Sending...";
-  fetch("https://api.web3forms.com/submit", { method: "POST", body: new FormData(form) })
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      if (data.success) {
-        status.textContent = "Thanks! Your enquiry has been sent. We will reply within one working day.";
-        form.reset();
-      } else {
-        status.textContent = "Sorry, something went wrong. Please email novusstacks@gmail.com directly.";
-      }
-    })
-    .catch(function () {
-      status.textContent = "Network error. Please try again or email novusstacks@gmail.com directly.";
-    })
-    .finally(function () { button.disabled = false; });
+  var data = Object.fromEntries(new FormData(form).entries());
+  try {
+    var res = await fetch("/api/enquiry", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    var out = await res.json();
+    if (out.success) {
+      status.textContent = "Thanks! Your enquiry has been sent. We will reply within one working day.";
+      form.reset();
+    } else {
+      status.textContent = "Sorry, something went wrong. Please email novusstacks@gmail.com directly.";
+    }
+  } catch (err) {
+    status.textContent = "Network error. Please try again or email novusstacks@gmail.com directly.";
+  } finally {
+    button.disabled = false;
+  }
 });
+
+route();
 </script>
+</body>
+</html>
