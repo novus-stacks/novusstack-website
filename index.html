@@ -652,7 +652,7 @@ $("enquiry").addEventListener("submit", async function (e) {
   }
 });
 
-// Chat widget (calls /api/chat -> Netlify function -> Groq)
+// Chat widget (calls /api/chat -> Netlify function -> Gemini)
 var chatHistory = [];
 var chatPanel = $("chat-panel");
 var chatLog = $("chat-log");
@@ -664,6 +664,24 @@ function addMsg(role, text) {
   chatLog.appendChild(d);
   chatLog.scrollTop = chatLog.scrollHeight;
   return d;
+}
+
+// Render a reply; ```code``` blocks are shown as code boxes
+function renderReply(el, text) {
+  el.textContent = "";
+  text.split(/```(?:\w+)?\n?/).forEach(function (part, i) {
+    if (i % 2 === 1) {
+      var pre = document.createElement("pre");
+      var code = document.createElement("code");
+      code.textContent = part.replace(/\n$/, "");
+      pre.appendChild(code);
+      el.appendChild(pre);
+    } else if (part.trim()) {
+      var p = document.createElement("div");
+      p.textContent = part.trim();
+      el.appendChild(p);
+    }
+  });
 }
 
 function toggleChat(open) {
@@ -699,7 +717,7 @@ $("chat-form").addEventListener("submit", async function (e) {
     });
     var out = await res.json();
     if (res.ok && out.reply) {
-      typing.textContent = out.reply;
+      renderReply(typing, out.reply);
       chatHistory.push({ role: "assistant", content: out.reply });
     } else {
       typing.textContent = "Sorry, the assistant is busy right now. Please email novusstacks@gmail.com.";
