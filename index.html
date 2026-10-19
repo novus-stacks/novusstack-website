@@ -452,6 +452,18 @@ rzp.open();
         <form id="register-form">
           <label>Name <input name="name" required autocomplete="name"></label>
           <label>Email <input name="email" type="email" required autocomplete="email"></label>
+          <label>Country
+            <select name="country" required>
+              <option value="">Select your country</option>
+              <option>India</option>
+              <option>United States</option>
+              <option>United Kingdom</option>
+              <option>United Arab Emirates</option>
+              <option>Singapore</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>State / Region <input name="state" required autocomplete="address-level1" placeholder="e.g. Tamil Nadu"></label>
           <label>Password (minimum 6 characters) <input name="password" type="password" required minlength="6" autocomplete="new-password"></label>
           <button class="btn" type="submit" id="register-btn">Create account</button>
           <p class="note" id="register-msg" role="status"></p>
@@ -484,6 +496,7 @@ rzp.open();
 
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-firestore-compat.js"></script>
 <script>
 // Firebase config (public values, safe in frontend code)
 firebase.initializeApp({
@@ -495,6 +508,8 @@ firebase.initializeApp({
   appId: "1:740102135820:web:c8da7dc7367ffd5f474e29"
 });
 var auth = firebase.auth();
+var db = firebase.firestore();
+var userProfile = null; // { country, state } of the logged-in user, used for chat language
 
 function $(id) { return document.getElementById(id); }
 
@@ -552,7 +567,15 @@ function renderUser(user) {
   $("register-panel").hidden = logged || location.hash !== "#register";
 }
 
-auth.onAuthStateChanged(renderUser);
+auth.onAuthStateChanged(function (user) {
+  renderUser(user);
+  userProfile = null;
+  if (user) {
+    db.collection("users").doc(user.uid).get()
+      .then(function (snap) { userProfile = snap.exists ? snap.data() : null; })
+      .catch(function () { userProfile = null; });
+  }
+});
 
 function logout() { auth.signOut(); }
 $("logout-btn").addEventListener("click", logout);
@@ -579,7 +602,17 @@ $("register-form").addEventListener("submit", function (e) {
   btn.disabled = true;
   $("register-msg").textContent = "Creating account...";
   auth.createUserWithEmailAndPassword(f.email.value, f.password.value)
-    .then(function (cred) { return cred.user.updateProfile({ displayName: f.name.value }); })
+    .then(function (cred) {
+      userProfile = { country: f.country.value, state: f.state.value.trim() };
+      return cred.user.updateProfile({ displayName: f.name.value }).then(function () {
+        return db.collection("users").doc(cred.user.uid).set({
+          name: f.name.value,
+          email: f.email.value,
+          country: userProfile.country,
+          state: userProfile.state
+        });
+      });
+    })
     .then(function () {
       renderUser(auth.currentUser);
       $("register-msg").textContent = "";
@@ -638,7 +671,7 @@ function toggleChat(open) {
   $("chat-fab").setAttribute("aria-expanded", String(open));
   if (open) {
     if (!chatLog.childElementCount) {
-      addMsg("bot", "Hi! Naan Novusstack assistant. Websites, e-commerce, AI chatbot pathi enna venum-nu kelunga.");
+      addMsg("bot", "Hi! I'm the Novusstack assistant. Ask me about websites, e-commerce stores or AI chatbots.");
     }
     $("chat-form").q.focus();
   }
@@ -662,18 +695,18 @@ $("chat-form").addEventListener("submit", async function (e) {
     var res = await fetch("/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: chatHistory })
+      body: JSON.stringify({ messages: chatHistory, locale: userProfile })
     });
     var out = await res.json();
     if (res.ok && out.reply) {
       typing.textContent = out.reply;
       chatHistory.push({ role: "assistant", content: out.reply });
     } else {
-      typing.textContent = "Sorry, bot ippo busy-a irukku. novusstacks@gmail.com-ku email pannunga.";
+      typing.textContent = "Sorry, the assistant is busy right now. Please email novusstacks@gmail.com.";
       chatHistory.pop();
     }
   } catch (err) {
-    typing.textContent = "Network error. Konjam kazhichu try pannunga.";
+    typing.textContent = "Network error. Please try again in a moment.";
     chatHistory.pop();
   } finally {
     btn.disabled = false;
