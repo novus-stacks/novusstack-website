@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://novus-stacks.github.io/novusstack-website/sitemap.xml
